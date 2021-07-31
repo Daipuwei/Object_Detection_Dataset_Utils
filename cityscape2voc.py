@@ -5,6 +5,17 @@
 # @File    : cityscape2voc.py
 # @Software: PyCharm
 
+"""
+    这是将Cityscapes数据集转换为VOC数据集格式的工具脚本。
+    根据自身需要修改cityscape_dataset_dir，voc_dataset_dir，class_names即可。
+
+    其中:
+        cityscape_dataset_dir是原生cityscapes数据集目录路径，
+        voc_dataset_dir是VOC数据集格式的cityscapes数据集目录路径，
+        class_names为指定目标名称数组，默认为['car', 'person', 'rider', 'truck', 'bus',
+        'train', 'motorcycle', 'bicycle'],即只处理class_names出现的目标实例。
+"""
+
 import os
 import cv2
 import json
@@ -41,7 +52,6 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
     # 初始化图像和标签文件数组
     cityscapes_image_paths = []
     cityscapes_json_paths = []
-    cityscapes_foggy_mask_paths = []
     voc_image_paths = []
     voc_annotation_paths = []
     for choice in ['train','val']:
@@ -145,7 +155,7 @@ def single_image_label_process(cityscapes_image_path,cityscapes_json_path,
         obj_label = obj['label']  # 目标的类型
         if obj_label in ['out of roi', 'ego vehicle']:  # 直接跳过这两种类型 注意测试集里只有这两种类型 跳过的话测试集合里将为空的标签
             continue
-        elif obj_label not in class_names:      # 目标分类标签不在候选目标分类标签数组中，跳过
+        elif obj_label not in class_names:      # 目标分类标签不在候选目标分类标签数组中，跳过，只处理候选目标名称数组里的目标实例
             continue
         else:
             # 获取目标的矩形框标签,并添加到写类中

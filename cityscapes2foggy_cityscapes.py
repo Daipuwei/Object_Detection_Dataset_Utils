@@ -6,7 +6,16 @@
 # @Software: PyCharm
 
 """
-    默认Cityscapes数据集已经转化为VOC数据集格式
+    这是根据Cityscapes数据集和已有的Foggy Cityscapes图像集生成Foggy Cityscapes
+    数据集的工具脚本，默认Cityscapes数据集已经转化为VOC数据集格式。 根据自身需要修改beta、
+    cityscapes_dataset_dir、foggy_cityscapes_dataset_dir和foggy_image_dir即可
+    完成Foggy Cityscapes数据集的生成。
+
+    其中:
+        cityscapes_dataset_dir代表已经转化为VOC数据集格式的cityscapes数据集目录地址，
+        foggy_cityscapes_dataset_dir代表VOC数据集格式的foggy cityscapes数据集目录地址，
+        foggy_image_dir为人工生成的带雾cityscapes图像数据目录地址，
+        beta代表雾浓度。
 """
 
 import os
