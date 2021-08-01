@@ -48,6 +48,16 @@ def cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_
     if not os.path.exists(foggy_cityscapes_main_dir):
         os.makedirs(foggy_cityscapes_main_dir)
 
+    # 初始化Foggy_CItyscapes数据集的XML文件路径
+    cityscapes_label_dir = os.path.join(cityscapes_dataset_dir,"Annotations")
+    cityscapes_label_paths = []
+    foggy_cityscapes_label_paths = []
+    for annotation_name in os.listdir(cityscapes_label_dir):
+        name,ext = os.path.splitext(annotation_name)
+        cityscapes_label_paths.append(os.path.join(cityscapes_label_dir,annotation_name))
+        foggy_cityscapes_label_paths.append(os.path.join(foggy_cityscapes_label_dir,name+"_foggy_beta_{}".format(beta)+ext))
+
+    # 初始化Foggy_Cityscapes数据集图像路径
     foggy_image_paths = []
     foggy_cityscapes_image_paths = []
     for choice in ["train","val"]:
@@ -58,19 +68,17 @@ def cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_
                 city_dir = os.path.join(_foggy_cityscapes_image_dir,city_name)
                 for image_name in os.listdir(city_dir):
                     if "beta_{}".format(beta) in image_name:
-                        foggy_image_paths.append(os.path.join(city_dir,image_name))
-                        foggy_cityscapes_image_paths.append(os.path.join(foggy_cityscapes_image_dir,image_name))
-                        f.write(os.path.join(city_dir,image_name)+"\n")         # 写入文件名称到指定txt文件
-
-    # 初始化CItyscapes数据集的XML文件路径
-    cityscapes_label_dir = os.path.join(cityscapes_dataset_dir,"Annotations")
-    cityscapes_label_paths = []
-    foggy_cityscapes_label_paths = []
-    for annotation_name in os.listdir(cityscapes_label_dir):
-        name,ext = os.path.splitext(annotation_name)
-        cityscapes_label_paths.append(os.path.join(cityscapes_label_dir,annotation_name))
-        foggy_cityscapes_label_paths.append(os.path.join(foggy_cityscapes_label_dir,name+"_foggy_beta_{}".format(beta)+ext))
-
+                        name,ext = os.path.splitext(image_name)
+                        if is_contain_object(name,foggy_cityscapes_label_paths):            # Foggy Cityscapes图像存在目标
+                            foggy_image_paths.append(os.path.join(city_dir,image_name))
+                            foggy_cityscapes_image_paths.append(os.path.join(foggy_cityscapes_image_dir,image_name))
+                            f.write(image_name+"\n")         # 写入文件名称到指定txt文件
+    # 将数据集图像名称写入voc数据集的trainval.txt文件
+    with open(os.path.join(foggy_cityscapes_main_dir, 'trainval.txt'), "w+") as f:
+        for cityscapes_image_path in foggy_cityscapes_image_paths:
+            dir, image_name = os.path.split(cityscapes_image_path)
+            name, ext = os.path.splitext(image_name)
+            f.write(name + "\n")
 
     # 多线程将Foggy_Cityscapes数据集图像复制到Cityscapes数据集目录里，假定Cityscapes数据集已经转化成VOC数据集格式
     size = len(cityscapes_label_paths)
@@ -134,6 +142,20 @@ def print_error(value):
     :return:
     """
     print("error: ", value)
+
+def is_contain_object(image_name,foggy_cityscapes_label_paths):
+    """
+    这是Foggy Cityscapes数据集中一张图像是否存在目标的函数
+    :param image_name: 图像名称
+    :param foggy_cityscapes_label_paths: Foggy Cityscapes数据集图像路径数组
+    :return:
+    """
+    flag = False
+    for foggy_image_path in foggy_cityscapes_label_paths:
+        if image_name in foggy_image_path:
+            flag = True
+            break
+    return flag
 
 def run_main():
     """

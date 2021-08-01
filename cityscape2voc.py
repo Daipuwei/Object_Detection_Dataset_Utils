@@ -69,11 +69,14 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
             for image_name in os.listdir(city_dir):                     # 遍历每个城市下的所有图片
                 # 初始化cityscape数据集和voc数据集图像和标签文件路径
                 name,ext = os.path.splitext(image_name)
-                _cityscapes_image_paths.append(os.path.join(city_dir,image_name))
-                _cityscapes_json_paths.append(os.path.join(cityscapes_label_dir,choice,city_name,
-                                                           name.replace("leftImg8bit","gtFine_polygons")+".json"))
-                _voc_image_paths.append(os.path.join(voc_image_dir,image_name))
-                _voc_annotation_paths.append(os.path.join(voc_annotation_dir,name+".xml"))
+                cityscapes_image_path = os.path.join(city_dir,image_name)
+                cityscapes_json_path = os.path.join(cityscapes_label_dir,choice,city_name,
+                                                    name.replace("leftImg8bit","gtFine_polygons")+".json")
+                if is_conitain_object(cityscapes_json_path,class_names):            # 判断图片是否包含候选目标实例
+                    _cityscapes_image_paths.append(cityscapes_image_path)
+                    _cityscapes_json_paths.append(cityscapes_json_path)
+                    _voc_image_paths.append(os.path.join(voc_image_dir,image_name))
+                    _voc_annotation_paths.append(os.path.join(voc_annotation_dir,name+".xml"))
         # 将子数据及图像名称写入voc数据集的txt文件
         with open(os.path.join(voc_imagesets_main_dir, choice + '.txt'), "w+") as f:
             for voc_image_path in _voc_image_paths:
@@ -88,6 +91,13 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
     cityscapes_json_paths = np.concatenate(cityscapes_json_paths,axis=0)
     voc_image_paths = np.concatenate(voc_image_paths,axis=0)
     voc_annotation_paths = np.concatenate(voc_annotation_paths, axis=0)
+    # 将数据集图像名称写入voc数据集的trainval.txt文件
+    with open(os.path.join(voc_imagesets_main_dir, 'trainval.txt'), "w+") as f:
+        for voc_image_path in voc_image_paths:
+            dir, image_name = os.path.split(voc_image_path)
+            name, ext = os.path.splitext(image_name)
+            f.write(name + "\n")
+
     # 利用多线程将cityscape数据集转化为voc数据集
     size = len(cityscapes_image_paths)
     batch_size = size // (cpu_count() - 1)
@@ -105,6 +115,25 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
                                batch_voc_image_paths,batch_voc_annotation_paths,class_names))
     pool.close()
     pool.join()
+
+def is_conitain_object(cityscapes_json_path,class_names):
+    """
+    这是判断cityscapes数据集的json标签中是否包含候选目标实例的函数
+    :param cityscapes_json_path: cityscapes数据集的json标签文件路径
+    :param class_names: 目标分类数组
+    :return:
+    """
+    json_dict = json.load(open(cityscapes_json_path, 'r'))  # 加载json标签
+    flag = False
+    for obj in json_dict['objects']:  # load_dict['objects'] -> 目标的几何框体
+        obj_label = obj['label']  # 目标的类型
+        if obj_label not in class_names:
+            continue
+        else:
+            flag = True
+            break
+    return flag
+
 
 def print_error(value):
     """
