@@ -137,7 +137,7 @@ def is_conitain_object(cityscapes_json_path,class_names):
 
 def print_error(value):
     """
-    定义自己的回调函数
+    定义自己的错误回调函数
     :param value:
     :return:
     """
