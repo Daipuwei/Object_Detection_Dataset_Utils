@@ -10,10 +10,10 @@
     根据自身需要修改cityscape_dataset_dir，voc_dataset_dir，class_names即可。
 
     其中:
-        cityscape_dataset_dir是原生cityscapes数据集目录路径，
-        voc_dataset_dir是VOC数据集格式的cityscapes数据集目录路径，
-        class_names为指定目标名称数组，默认为['car', 'person', 'rider', 'truck', 'bus',
-        'train', 'motorcycle', 'bicycle','traffic sign','traffic light'],即只处理class_names出现的目标实例。
+        - cityscape_dataset_dir是原生cityscapes数据集目录路径；
+        - voc_dataset_dir是VOC数据集格式的cityscapes数据集目录路径；
+        - class_names为指定目标名称数组，默认为['car', 'person', 'rider', 'truck', 'bus',
+          'train', 'motorcycle', 'bicycle','traffic sign','traffic light'],即只处理class_names出现的目标实例；
 """
 
 import os

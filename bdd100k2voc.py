@@ -5,6 +5,19 @@
 # @File    : bdd100k2voc.py
 # @Software: PyCharm
 
+"""
+    这是将BDD100k数据集转换为VOC数据集格式的脚本，根据开发需要自行修改
+    bdd100k_dataset_dir、voc_dataset_dir、class_names和dataset_type即可。
+
+    其中:
+        - bdd100k_dataset_dir代表原始BDD100k数据集目录；
+        - voc_dataset_dir代表VOC数据集格式的BDD100k数据集目录；
+        - class_names代表目标名称数组，该参数控制VOC数据集格式的BDD100k数据集包含的目标种类，
+          默认为['car', 'person', 'rider', 'truck', 'bus','train', 'motorcycle', 'bicycle','traffic sign','traffic light']；
+        - dataset_type代表数据集类型，候选值有‘all’、‘daytime’和‘night’，
+          ‘all’代表转化全部数据，‘daytime’代表转化白天数据，‘night’代表转化夜晚数据；
+"""
+
 import os
 import cv2
 import json

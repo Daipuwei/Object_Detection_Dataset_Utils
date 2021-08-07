@@ -12,10 +12,10 @@
     完成Foggy Cityscapes数据集的生成。
 
     其中:
-        cityscapes_dataset_dir代表已经转化为VOC数据集格式的cityscapes数据集目录地址，
-        foggy_cityscapes_dataset_dir代表VOC数据集格式的foggy cityscapes数据集目录地址，
-        foggy_image_dir为人工生成的带雾cityscapes图像数据目录地址，
-        beta代表雾浓度。
+        - cityscapes_dataset_dir代表已经转化为VOC数据集格式的cityscapes数据集目录地址；
+        - foggy_cityscapes_dataset_dir代表VOC数据集格式的foggy cityscapes数据集目录地址；
+        - foggy_image_dir为人工生成的带雾cityscapes图像数据目录地址；
+        - beta代表雾浓度，候选值有0.005、0.01和0.02；
 """
 
 import os
@@ -130,9 +130,13 @@ def copy_image_label(foggy_image_path,foggy_cityscapes_image_path,
     image = cv2.imread(foggy_image_path)
     cv2.imwrite(foggy_cityscapes_image_path,image)
 
-    # 复制XML文件
+    # 修改XML文件名称与路径，并复制XML文件到指定路径
+    dir,image_name = os.path.split(foggy_cityscapes_image_path)
     in_file = open(cityscapes_label_path)
     tree = ET.parse(in_file)
+    root = tree.getroot()
+    root.find("filename").text = image_name
+    root.find("path").text = foggy_cityscapes_image_path
     tree.write(foggy_cityscapes_label_path)
 
 def print_error(value):
