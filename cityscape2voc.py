@@ -13,7 +13,7 @@
         cityscape_dataset_dir是原生cityscapes数据集目录路径，
         voc_dataset_dir是VOC数据集格式的cityscapes数据集目录路径，
         class_names为指定目标名称数组，默认为['car', 'person', 'rider', 'truck', 'bus',
-        'train', 'motorcycle', 'bicycle'],即只处理class_names出现的目标实例。
+        'train', 'motorcycle', 'bicycle','traffic sign','traffic light'],即只处理class_names出现的目标实例。
 """
 
 import os
@@ -26,12 +26,13 @@ from multiprocessing import cpu_count
 from pascal_voc_writer import Writer
 
 def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
-                  class_names=['car','person','rider','truck','bus','train','motorcycle','bicycle']):
+                  class_names=['car','person','rider','truck','bus','train','motorcycle','bicycle','traffic sign','traffic light']):
     """
     这是cityscapes数据集转化为VOC数据集格式的函数
     :param cityscapes_dataset_dir: cityscapes数据集目录
     :param voc_dataset_dir: VOC数据集目录
-    :param class_names: 目标名称数组，默认为['car','person','rider','truck','bus','train','motorcycle','bicycle']
+    :param class_names: 目标名称数组，默认为['car','person','rider','truck','bus','train',
+                                            'motorcycle','bicycle','traffic sign','traffic light']
     :return:
     """
     # 初始化cityscapes数据集相关路径
@@ -63,7 +64,7 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
         _voc_annotation_paths = []
         # 初始化子数据集目录路径
         _cityscapes_image_dir = os.path.join(cityscapes_image_dir, choice)
-        for city_name in os.listdir(_cityscapes_image_dir):              # 遍历每个城市文件夹
+        for city_name in tqdm(os.listdir(_cityscapes_image_dir)):              # 遍历每个城市文件夹
             # 初始化每个城市目录路径
             city_dir = os.path.join(_cityscapes_image_dir,city_name)
             for image_name in os.listdir(city_dir):                     # 遍历每个城市下的所有图片
@@ -110,11 +111,19 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
         batch_voc_image_paths = voc_image_paths[start:end]
         batch_voc_annotation_paths = voc_annotation_paths[start:end]
         print("线程{}处理{}张图像及其标签".format(i,len(batch_cityscapes_json_paths)))
-        pool.apply_async(batch_postprocess,error_callback=print,
+        pool.apply_async(batch_image_label_process,error_callback=print,
                          args=(batch_cityscapes_image_paths,batch_cityscapes_json_paths,
                                batch_voc_image_paths,batch_voc_annotation_paths,class_names))
     pool.close()
     pool.join()
+
+def print_error(value):
+    """
+    定义自己的回调函数
+    :param value:
+    :return:
+    """
+    print("error: ", value)
 
 def is_conitain_object(cityscapes_json_path,class_names):
     """
@@ -133,15 +142,6 @@ def is_conitain_object(cityscapes_json_path,class_names):
             flag = True
             break
     return flag
-
-
-def print_error(value):
-    """
-    定义自己的错误回调函数
-    :param value:
-    :return:
-    """
-    print("error: ", value)
 
 def find_box(points):
     """
@@ -188,6 +188,9 @@ def single_image_label_process(cityscapes_image_path,cityscapes_json_path,
             continue
         else:
             # 获取目标的矩形框标签,并添加到写类中
+            if obj_label in ['traffic sign','traffic light']:           # 对于有空格的标签名称，删除空格
+                strs = obj_label.split(" ")
+                obj_label = strs[0]+"_"+strs[1]
             xmin,ymin,xmax,ymax = find_box(obj['polygon'])
             writer.addObject(obj_label,xmin,ymin,xmax,ymax)
             writer.save(voc_annotation_path)
@@ -196,8 +199,8 @@ def single_image_label_process(cityscapes_image_path,cityscapes_json_path,
         cv2.imwrite(voc_image_path, image)
 
 
-def batch_postprocess(batch_cityscapes_image_paths,batch_cityscapes_json_paths,
-                      batch_voc_image_paths,batch_voc_annotation_paths,class_names):
+def batch_image_label_process(batch_cityscapes_image_paths,batch_cityscapes_json_paths,
+                              batch_voc_image_paths,batch_voc_annotation_paths,class_names):
     """
     批量处理cityscape数据，转化为voc数据
     :param batch_cityscapes_image_paths: 批量cityscapes图像路径数组
@@ -222,9 +225,9 @@ def run_main():
     """
     # Cityscapes --> VOC
     print("Cityscapes --> VOC Start")
-    cityscape_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/object_detection_dataset/cityscapes")
-    voc_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Cityscapes")
-    class_names = ['car', 'person', 'rider', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
+    cityscape_dataset_dir = os.path.abspath("../object_detection_dataset/cityscapes")
+    voc_dataset_dir = os.path.abspath("../dataset/Cityscapes")
+    class_names = ['car', 'person', 'rider', 'truck', 'bus', 'train', 'motorcycle', 'bicycle','traffic sign','traffic light']
     cityscapes2voc(cityscape_dataset_dir,voc_dataset_dir,class_names)
     print("Cityscapes --> VOC Finish")
 

@@ -72,7 +72,7 @@ def cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_
                         if is_contain_object(name,foggy_cityscapes_label_paths):            # Foggy Cityscapes图像存在目标
                             foggy_image_paths.append(os.path.join(city_dir,image_name))
                             foggy_cityscapes_image_paths.append(os.path.join(foggy_cityscapes_image_dir,image_name))
-                            f.write(image_name+"\n")         # 写入文件名称到指定txt文件
+                            f.write(name+"\n")         # 写入文件名称到指定txt文件
     # 将数据集图像名称写入voc数据集的trainval.txt文件
     with open(os.path.join(foggy_cityscapes_main_dir, 'trainval.txt'), "w+") as f:
         for cityscapes_image_path in foggy_cityscapes_image_paths:
@@ -164,27 +164,27 @@ def run_main():
     # Cityscapes --> Foggy_Cityscapes_beta_0.005
     print("Cityscapes --> Foggy_Cityscapes_beta=0.005 Start")
     beta = 0.005
-    cityscapes_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Cityscapes")
-    foggy_cityscapes_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Foggy_Cityscapes_beta_{}".format(beta))
-    foggy_image_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/object_detection_dataset/cityscapes_foggy/leftImg8bit_trainvaltest_foggy/leftImg8bit_foggy")
+    cityscapes_dataset_dir = os.path.abspath("../dataset/Cityscapes")
+    foggy_cityscapes_dataset_dir = os.path.abspath("../dataset/Foggy_Cityscapes_beta_{}".format(beta))
+    foggy_image_dir = os.path.abspath("../object_detection_dataset/cityscapes_foggy/leftImg8bit_trainvaltest_foggy/leftImg8bit_foggy")
     cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_dir,foggy_image_dir,beta)
     print("Cityscapes --> Foggy_Cityscapes_beta_0.005 Finish")
 
     # Cityscapes --> Foggy_Cityscapes_beta=0.01
     print("Cityscapes --> Foggy_Cityscapes_beta_0.01 Start")
     beta = 0.01
-    cityscapes_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Cityscapes")
-    foggy_cityscapes_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Foggy_Cityscapes_beta_{}".format(beta))
-    foggy_image_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/object_detection_dataset/cityscapes_foggy/leftImg8bit_trainvaltest_foggy/leftImg8bit_foggy")
+    cityscapes_dataset_dir = os.path.abspath("../dataset/Cityscapes")
+    foggy_cityscapes_dataset_dir = os.path.abspath("../dataset/Foggy_Cityscapes_beta_{}".format(beta))
+    foggy_image_dir = os.path.abspath("../object_detection_dataset/cityscapes_foggy/leftImg8bit_trainvaltest_foggy/leftImg8bit_foggy")
     cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_dir,foggy_image_dir,beta)
     print("Cityscapes --> Foggy_Cityscapes_beta_0.01 Finish")
 
     # Cityscapes --> Foggy_Cityscapes_beta=0.02
     print("Cityscapes --> Foggy_Cityscapes_beta_0.02 Start")
     beta = 0.02
-    cityscapes_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Cityscapes")
-    foggy_cityscapes_dataset_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/dataset/Foggy_Cityscapes_beta_{}".format(beta))
-    foggy_image_dir = os.path.abspath("/media/dpw/daipuwei/deeplearning/object_detection_dataset/cityscapes_foggy/leftImg8bit_trainvaltest_foggy/leftImg8bit_foggy")
+    cityscapes_dataset_dir = os.path.abspath("../dataset/Cityscapes")
+    foggy_cityscapes_dataset_dir = os.path.abspath("../dataset/Foggy_Cityscapes_beta_{}".format(beta))
+    foggy_image_dir = os.path.abspath("../object_detection_dataset/cityscapes_foggy/leftImg8bit_trainvaltest_foggy/leftImg8bit_foggy")
     cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_dir,foggy_image_dir,beta)
     print("Cityscapes --> Foggy_Cityscapes_beta_0.02 Finish")
 
