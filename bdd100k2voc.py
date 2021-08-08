@@ -139,7 +139,7 @@ def bdd100k2voc(bdd100k_dataset_dir,voc_dataset_dir,dataset_type='all',
 
 def print_error(value):
     """
-    定义回调函数
+    定义错误回调函数
     :param value:
     :return:
     """

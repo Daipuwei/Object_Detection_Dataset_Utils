@@ -7,7 +7,7 @@
 
 """
     这是将Cityscapes数据集转换为VOC数据集格式的工具脚本。
-    根据自身需要修改cityscape_dataset_dir，voc_dataset_dir，class_names即可。
+    根据开发需要修改cityscape_dataset_dir，voc_dataset_dir，class_names即可。
 
     其中:
         - cityscape_dataset_dir是原生cityscapes数据集目录路径；
@@ -28,7 +28,7 @@ from pascal_voc_writer import Writer
 def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
                   class_names=['car','person','rider','truck','bus','train','motorcycle','bicycle','traffic sign','traffic light']):
     """
-    这是cityscapes数据集转化为VOC数据集格式的函数
+    这是Cityscapes数据集转化为VOC数据集格式的函数
     :param cityscapes_dataset_dir: cityscapes数据集目录
     :param voc_dataset_dir: VOC数据集目录
     :param class_names: 目标名称数组，默认为['car','person','rider','truck','bus','train',
@@ -119,7 +119,7 @@ def cityscapes2voc(cityscapes_dataset_dir,voc_dataset_dir,
 
 def print_error(value):
     """
-    定义自己的回调函数
+    定义错误回调函数
     :param value:
     :return:
     """
@@ -202,7 +202,7 @@ def single_image_label_process(cityscapes_image_path,cityscapes_json_path,
 def batch_image_label_process(batch_cityscapes_image_paths,batch_cityscapes_json_paths,
                               batch_voc_image_paths,batch_voc_annotation_paths,class_names):
     """
-    批量处理cityscape数据，转化为voc数据
+    批量处理cityscape数据转化为voc数据
     :param batch_cityscapes_image_paths: 批量cityscapes图像路径数组
     :param batch_cityscapes_json_paths: 批量cityscapes标签路径数组
     :param batch_voc_image_paths: 批量voc图像路径数组

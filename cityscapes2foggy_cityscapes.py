@@ -7,7 +7,7 @@
 
 """
     这是根据Cityscapes数据集和已有的Foggy Cityscapes图像集生成Foggy Cityscapes
-    数据集的工具脚本，默认Cityscapes数据集已经转化为VOC数据集格式。 根据自身需要修改beta、
+    数据集的工具脚本，默认Cityscapes数据集已经转化为VOC数据集格式。 根据开发需要修改beta、
     cityscapes_dataset_dir、foggy_cityscapes_dataset_dir和foggy_image_dir即可
     完成Foggy Cityscapes数据集的生成。
 
@@ -27,10 +27,9 @@ from tqdm import tqdm
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 
-
 def cityscapes2foggy_cityscapes(cityscapes_dataset_dir,foggy_cityscapes_dataset_dir,foggy_image_dir,beta=0.01):
     """
-    这是将cityscapes数据集转化为foggy_cityscapes数据集的函数，假定Cityscapes数据集已经转化成VOC数据集格式
+    这是根据Cityscapes数据集和为Foggy Cityscapes图像集生成Foggy Cityscapes数据集的函数，假定Cityscapes数据集已经转化成VOC数据集格式
     :param cityscapes_dataset_dir: cityscapes数据集目录
     :param foggy_cityscapes_dataset_dir: foggy_cityscapes数据集目录
     :param foggy_image_dir: 雾深度图像数据集目录
@@ -141,7 +140,7 @@ def copy_image_label(foggy_image_path,foggy_cityscapes_image_path,
 
 def print_error(value):
     """
-    定义自己的回调函数
+    定义错误回调函数
     :param value:
     :return:
     """
