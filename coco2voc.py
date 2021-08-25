@@ -90,9 +90,11 @@ def coco2voc(coco_dataset_dir,voc_dataset_dir,year=2017):
         with open(voc_txt_path,'w') as f:
             for image_name in os.listdir(coco_image_dir):
                 name,ext = os.path.splitext(image_name)
-                f.write(name+"\n")
-                coco_image_paths.append(os.path.join(coco_image_dir,image_name))
-                voc_image_paths.append(os.path.join(voc_image_dir,image_name))
+                xml_path = os.path.join(voc_annotation_dir,name+".xml")
+                if os.path.exists(xml_path):            # 标签文件存在则写入
+                    f.write(name+"\n")
+                    coco_image_paths.append(os.path.join(coco_image_dir,image_name))
+                    voc_image_paths.append(os.path.join(voc_image_dir,image_name))
     with open(os.path.join(voc_imagesets_main_dir,"trainval.txt"),'w') as f:
         for coco_image_path in coco_image_paths:
             dir,image_name = os.path.split(coco_image_path)
