@@ -187,14 +187,7 @@ def run_main():
     """
     这是主函数
     """
-    # COCO2017 -> COCO2017-Person
-    voc_dataset_dir = os.path.abspath("../dataset/COCO2017")
-    new_voc_dataset_dir = os.path.abspath("../dataset/person/COCO2017")
-    class_names = ['person']
-    train_ratio = 0.8
-    copy_voc_dataset(voc_dataset_dir,new_voc_dataset_dir,class_names,train_ratio)
-
-    # VOC07+12 -> VOC07+12-Person
+    # VOC07+12 --> VOC07+12-Person
     voc_dataset_dir = os.path.abspath("../origin_dataset/VOC07+12")
     new_voc_dataset_dir = os.path.abspath("../dataset/person/VOC07+12")
     class_names = ['person']
