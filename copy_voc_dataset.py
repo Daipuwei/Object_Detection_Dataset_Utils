@@ -146,22 +146,23 @@ def process_image_xml(voc_image_path,voc_xml_path,new_voc_image_path,new_voc_xml
     :return:
     """
     # 解析XML文件
-    in_file = open(voc_xml_path)
-    tree = ET.parse(in_file)
-    root = tree.getroot()
+    if os.path.exists(voc_xml_path):
+        in_file = open(voc_xml_path)
+        tree = ET.parse(in_file)
+        root = tree.getroot()
 
-    # 遍历所有目标结点，逐一删除不需要的目标种类的结点
-    cnt = len(root.findall('object'))           # xml文件中包含的目标个数
-    for obj in root.findall('object'):
-        cls_name = obj.find('name').text
-        if cls_name not in class_names:        # 目标不在指定目标数组内则删除
-            root.remove(obj)
-            cnt -= 1
+        # 遍历所有目标结点，逐一删除不需要的目标种类的结点
+        cnt = len(root.findall('object'))           # xml文件中包含的目标个数
+        for obj in root.findall('object'):
+            cls_name = obj.find('name').text
+            if cls_name not in class_names:        # 目标不在指定目标数组内则删除
+                root.remove(obj)
+                cnt -= 1
 
-    if cnt > 0:         # 还存在目标则完成xml文件的复制和图像复制
-        tree.write(new_voc_xml_path)
-        image = cv2.imread(voc_image_path)
-        cv2.imwrite(new_voc_image_path,image)
+        if cnt > 0:         # 还存在目标则完成xml文件的复制和图像复制
+            tree.write(new_voc_xml_path)
+            image = cv2.imread(voc_image_path)
+            cv2.imwrite(new_voc_image_path,image)
 
 def batch_process_image_xml(batch_voc_image_paths,batch_voc_annotation_paths,
                             batch_new_voc_image_paths,batch_new_voc_annotation_paths,class_names):
