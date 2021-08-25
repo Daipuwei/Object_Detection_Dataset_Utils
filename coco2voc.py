@@ -150,7 +150,7 @@ def run_main():
     """
     # COCO --> VOC
     print("COCO2017 --> VOC Start")
-    coco_dataset_dir = os.path.abspath("C:\\code\\ObjectiDetection\\origin_dataset\\COCO2017")
+    coco_dataset_dir = os.path.abspath("../origin_dataset/COCO2017")
     voc_dataset_dir = os.path.abspath("../dataset/COCO2017")
     year = 2017
     coco2voc(coco_dataset_dir,voc_dataset_dir,year)
