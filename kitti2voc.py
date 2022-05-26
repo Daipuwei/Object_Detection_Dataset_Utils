@@ -37,6 +37,7 @@ def kitti2voc(kitti_dataset_dir,voc_dataset_dir,train_ratio=0.8,
     # 初始化kitti数据集相关路径
     kitti_image_dir = os.path.join(kitti_dataset_dir,'training','image_2')
     kitti_label_dir = os.path.join(kitti_dataset_dir,'training','label_2')
+    #print(kitti_image_dir,kitti_label_dir)
 
     # 初始化voc数据集相关路径
     voc_image_dir = os.path.join(voc_dataset_dir, 'JPEGImages')
@@ -56,16 +57,19 @@ def kitti2voc(kitti_dataset_dir,voc_dataset_dir,train_ratio=0.8,
     voc_annotation_paths = []
     for txt_name in os.listdir(kitti_label_dir):
         txt_label_path = os.path.join(kitti_label_dir,txt_name)
+        #print(txt_label_path)
+        #print(is_conitain_object(txt_label_path,class_names))
         if is_conitain_object(txt_label_path,class_names):
             name,ext = os.path.splitext(txt_name)
             kitti_image_paths.append(os.path.join(kitti_image_dir,name+".png"))
             kitti_label_paths.append(os.path.join(kitti_label_dir,txt_name))
-            voc_image_paths.append(os.path.join(voc_image_dir,name+".png"))
+            voc_image_paths.append(os.path.join(voc_image_dir,name+".jpg"))
             voc_annotation_paths.append(os.path.join(voc_annotation_dir,name+".xml"))
     kitti_image_paths = np.array(kitti_image_paths)
     kitti_label_paths = np.array(kitti_label_paths)
     voc_image_paths = np.array(voc_image_paths)
     voc_annotation_paths = np.array(voc_annotation_paths)
+    print(len(kitti_image_paths),len(kitti_label_paths),len(voc_image_paths),len(voc_annotation_paths))
 
     # 随机打乱数据集
     size = len(kitti_label_paths)
@@ -197,8 +201,8 @@ def run_main():
     """
     # KITTI --> VOC
     print("KITTI --> VOC Start")
-    kitti_dataset_dir = os.path.abspath("../object_detection_dataset/KITTI")
-    voc_dataset_dir = os.path.abspath("../dataset/KITTI")
+    kitti_dataset_dir = os.path.abspath("../KITTI")
+    voc_dataset_dir = os.path.abspath("../dataset/Person-NonCar/KITTI")
     train_ratio = 0.8
     class_names=['Person_sitting',"Pedestrian",'Cyclist',"Truck","Car","Tram","Van"]
     kitti2voc(kitti_dataset_dir,voc_dataset_dir,train_ratio,class_names)

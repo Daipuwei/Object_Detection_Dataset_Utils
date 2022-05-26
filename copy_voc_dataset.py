@@ -6,7 +6,7 @@
 # @Software: PyCharm
 
 """
-    这是根据指定目标类别复制VOC数据集的函数
+    这是根据指定目标类别复制VOC数据集的脚本
 """
 
 import os
@@ -80,13 +80,13 @@ def copy_voc_dataset(voc_dataset_dir,new_voc_dataset_dir,class_names,train_ratio
     new_voc_trainval_txt_path = os.path.join(new_voc_imagesets_main_dir, 'trainval.txt')
     new_voc_train_txt_path = os.path.join(new_voc_imagesets_main_dir,'train.txt')
     new_voc_val_txt_path = os.path.join(new_voc_imagesets_main_dir,'val.txt')
-    with open(new_voc_train_txt_path,'w') as f:
+    with open(new_voc_train_txt_path,'a') as f:
         for image_name in train_new_image_names:
             f.write(image_name+"\n")
-    with open(new_voc_val_txt_path, 'w') as f:
+    with open(new_voc_val_txt_path, 'a') as f:
         for image_name in val_new_image_names:
             f.write(image_name + "\n")
-    with open(new_voc_trainval_txt_path, 'w') as f:
+    with open(new_voc_trainval_txt_path, 'a') as f:
         for image_name in new_image_names:
             f.write(image_name + "\n")
 
@@ -113,18 +113,21 @@ def is_contain_classes(xml_path,class_names):
     :param class_names: 目标分类数组
     :return:
     """
-    # 解析XML文件
-    in_file = open(xml_path)
-    tree = ET.parse(in_file)
-    root = tree.getroot()
-
-    # 遍历所有目标结点,判断是否存在指定目标
     flag = False
-    for obj in root.findall('object'):
-        cls_name = obj.find('name').text
-        if cls_name in class_names:
-            flag = True
-            break
+    if os.path.exists(xml_path):
+        # 解析XML文件
+        in_file = open(xml_path)
+        tree = ET.parse(in_file)
+        root = tree.getroot()
+
+        # 遍历所有目标结点,判断是否存在指定目标
+        for obj in root.findall('object'):
+            cls_name = obj.find('name').text
+            if cls_name in class_names:
+                flag = True
+                break
+            else:
+                continue
     return flag
 
 def print_error(value):
@@ -146,23 +149,23 @@ def process_image_xml(voc_image_path,voc_xml_path,new_voc_image_path,new_voc_xml
     :return:
     """
     # 解析XML文件
-    if os.path.exists(voc_xml_path):
-        in_file = open(voc_xml_path)
-        tree = ET.parse(in_file)
-        root = tree.getroot()
+    in_file = open(voc_xml_path)
+    tree = ET.parse(in_file)
+    root = tree.getroot()
 
-        # 遍历所有目标结点，逐一删除不需要的目标种类的结点
-        cnt = len(root.findall('object'))           # xml文件中包含的目标个数
-        for obj in root.findall('object'):
-            cls_name = obj.find('name').text
-            if cls_name not in class_names:        # 目标不在指定目标数组内则删除
-                root.remove(obj)
-                cnt -= 1
+    # 遍历所有目标结点，逐一删除不需要的目标种类的结点
+    cnt = len(root.findall('object'))           # xml文件中包含的目标个数
+    for obj in root.findall('object'):
+        cls_name = obj.find('name').text
+        #print(cls_name)
+        if cls_name not in class_names:        # 目标不在指定目标数组内则删除
+            root.remove(obj)
+            cnt -= 1
 
-        if cnt > 0:         # 还存在目标则完成xml文件的复制和图像复制
-            tree.write(new_voc_xml_path)
-            image = cv2.imread(voc_image_path)
-            cv2.imwrite(new_voc_image_path,image)
+    if cnt > 0:         # 还存在目标则完成xml文件的复制和图像复制
+        tree.write(new_voc_xml_path)
+        image = cv2.imread(voc_image_path)
+        cv2.imwrite(new_voc_image_path,image)
 
 def batch_process_image_xml(batch_voc_image_paths,batch_voc_annotation_paths,
                             batch_new_voc_image_paths,batch_new_voc_annotation_paths,class_names):
@@ -187,10 +190,10 @@ def run_main():
     """
     这是主函数
     """
-    # VOC07+12 --> VOC07+12-Person
-    voc_dataset_dir = os.path.abspath("../origin_dataset/VOC07+12")
-    new_voc_dataset_dir = os.path.abspath("../dataset/person/VOC07+12")
-    class_names = ['person']
+    # BDD100k --> BDD100k-Person
+    voc_dataset_dir = os.path.abspath("../dataset/BDD100k")
+    new_voc_dataset_dir = os.path.abspath("../dataset/person/BDD100k")
+    class_names = ['person','rider']
     train_ratio = 0.8
     copy_voc_dataset(voc_dataset_dir, new_voc_dataset_dir, class_names, train_ratio)
 
