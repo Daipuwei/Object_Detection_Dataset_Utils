@@ -1,5 +1,6 @@
 # Object_Detection_Dataset_Utils
 这是各种目标检测数据集预处理工具脚本集合，主要功能实现各种数据集之间的格式格式转换和VOC数据集各种预处理功能。
+
 ---
 
 # 环境配置
@@ -22,6 +23,7 @@
 - `kitti2voc.py`是利用多线程将KITTI数据集转换为VOC数据集格式的脚本；
 - `coco2voc.py`是利用多线程将COCO数据集转换为VOC数据集格式的脚本；
 - `mot2voc.py`是利用多线程将MOT目标跟踪数据集转换为VOC数据集格式的脚本；
+
 ## VOC相关预处理
 以下脚本是对VOC格式数据集进行各种预处理功能，具体功能如下：
 - `delete_voc_dataset_object.py`是利用多线程删除VOC格式数据集XML标签文件中指定目标分类以外的所有目标框的脚本；
