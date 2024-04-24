@@ -17,11 +17,13 @@ from tqdm import tqdm
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 
-def get_voc_classes(voc_dataset_dir):
+def get_voc_classes(voc_dataset_dir,class_names_txt_path):
     """
     这是获取VOC数据集的目标分类数组的函数
-    :param voc_dataset_dir: VOC数据集目录
-    :return:
+    Args:
+        voc_dataset_dir:  VOC数据集目录
+        class_names_txt_path: 目标类别txt文件路径
+    Returns:
     """
     # 初始化VOC数据集XML标签文件路径
     annotation_paths = []
@@ -47,13 +49,21 @@ def get_voc_classes(voc_dataset_dir):
     classes_set = set()
     for result in results:
         classes_set = classes_set.union(result.get())
-    return classes_set
+    classes = list(classes_set)
+
+    # 将目标类别写入txt
+    with open(class_names_txt_path,'w' ,encoding='utf-8') as f:
+        for class_name in classes:
+            f.write("{}\n".format(class_name))
+
+    return classes
 
 def parse_xml_classes(xml_path):
     """
     这是解析XML文件中包含所有目标分类的函数
-    :param xml_path: XML文件路径
-    :return:
+    Args:
+        xml_path: XML文件路径
+    Returns:
     """
     tree = ET.parse(xml_path)
     objects = []
@@ -65,8 +75,9 @@ def parse_xml_classes(xml_path):
 def get_batch_annotation_classes(batch_annotation_paths):
     """
     这是获取小批量XML标签文件中目标分类名称的函数
-    :param batch_annotation_paths: 小批量标注文件路径
-    :return:
+    Args:
+        batch_annotation_paths: 小批量标注文件路径数组
+    Returns:
     """
     classes_set = set()
     for i in tqdm(np.arange(len(batch_annotation_paths))):
@@ -80,8 +91,9 @@ def get_batch_annotation_classes(batch_annotation_paths):
 def print_error(value):
     """
     定义错误回调函数
-    :param value:
-    :return:
+    Args:
+        value:
+    Returns:
     """
     print("error: ", value)
 
@@ -89,12 +101,11 @@ def run_main():
     """
     这是主函数
     """
-    print("===================")
-    dataset_dir = os.path.abspath("../dataset/BDD100k")
-    classes_set = get_voc_classes(dataset_dir)
+    dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/origin/VOC2007")
+    class_names_txt_path = "./voc_names.txt"
+    classes_set = get_voc_classes(dataset_dir,class_names_txt_path)
     for class_name in classes_set:
         print(class_name)
-    print("===================")
 
 if __name__ == '__main__':
     run_main()

@@ -19,35 +19,31 @@ from multiprocessing import Pool
 from multiprocessing import cpu_count
 from pascal_voc_writer import Writer
 
-def coco2voc(coco_dataset_dir,voc_dataset_dir,year=2017):
+def coco2voc(coco_dataset_dir,voc_dataset_dir,year=2017,choices=["train","val"]):
     """
     这是将COCO数据集转换为VOC数据集格式的函数
     Args:
         coco_dataset_dir: coco数据集目录路径
         voc_dataset_dir: voc数据集目录路径
         year: 年份，默认为2017
+        choice: 子集列表，默认为[‘train’，‘val’]
     Returns:
     """
     # 初始化coco数据集相关路径
-    coco_train_image_dir = os.path.join(coco_dataset_dir,'train{0}'.format(year))
-    coco_val_image_dir = os.path.join(coco_dataset_dir,"val{0}".format(year))
-    coco_train_json_path = os.path.join(coco_dataset_dir, 'annotations', 'train{0}.json'.format(year))
-    coco_val_json_path = os.path.join(coco_dataset_dir, 'annotations', 'val{0}.json'.format(year))
-    if not os.path.exists(coco_train_image_dir):
-        coco_train_image_dir = os.path.join(coco_dataset_dir, 'train')
-        coco_train_json_path = os.path.join(coco_dataset_dir, 'annotations', 'train.json')
-    if not os.path.exists(coco_val_image_dir):
-        coco_val_image_dir = os.path.join(coco_dataset_dir, 'val')
-        coco_val_json_path = os.path.join(coco_dataset_dir, 'annotations', 'val.json')
-    coco_image_json_paths = [(coco_train_image_dir,coco_train_json_path),
-                             (coco_val_image_dir,coco_val_json_path)]
-    choices = ["train", "val"]
+    coco_image_json_paths = []
+    for choice in choices:
+        _coco_image_dir = os.path.join(coco_dataset_dir, '{0}{1}'.format(choice,year))
+        _coco_json_path = os.path.join(coco_dataset_dir, 'annotations', '{0}{1}.json'.format(choice,year))
+        if not os.path.exists(_coco_image_dir):
+            _coco_image_dir = os.path.join(coco_dataset_dir, choice)
+            _coco_json_path = os.path.join(coco_dataset_dir, 'annotations', '{0}.json'.format(choice))
+        coco_image_json_paths.append((_coco_image_dir,_coco_json_path))
 
     # 初始化voc数据集相关路径
     voc_image_dir = os.path.join(voc_dataset_dir, 'JPEGImages')
     voc_annotation_dir = os.path.join(voc_dataset_dir, "Annotations")
     voc_imagesets_main_dir = os.path.join(voc_dataset_dir, "ImageSets", "Main")
-    _,voc_daatset_name = os.path.split(voc_dataset_dir)
+    _,voc_dataset_name = os.path.split(voc_dataset_dir)
     if not os.path.exists(voc_image_dir):
         os.makedirs(voc_image_dir)
     if not os.path.exists(voc_annotation_dir):
@@ -79,12 +75,23 @@ def coco2voc(coco_dataset_dir,voc_dataset_dir,year=2017):
                 for image_info in tqdm(image_infos):
                     # 初始化coco图像领、voc图像路径和voc标签路径
                     coco_image_path = os.path.join(coco_image_dir, image_info['file_name'])
-                    voc_image_path = os.path.join(voc_image_dir, "{0}_{1:07d}.jpg".format(voc_daatset_name,cnt))
-                    voc_annotation_path = os.path.join(voc_annotation_dir, "{0}_{1:07d}.xml".format(voc_daatset_name, cnt))
-                    coco_image_id_dict[image_info['id']] = coco_image_path
-                    coco_voc_image_dict[coco_image_path] = (voc_image_path,voc_annotation_path)
+                    voc_image_path = os.path.join(voc_image_dir, "{0}_{1:07d}.jpg".format(voc_dataset_name,cnt))
+                    voc_annotation_path = os.path.join(voc_annotation_dir, "{0}_{1:07d}.xml".format(voc_dataset_name, cnt))
+                    # is_contain_object = False
+                    # for gt in gts:
+                    #     if image_info['id'] == gt['image_id']:
+                    #         if len(gt['bbox']) != 0:
+                    #             is_contain_object = True
+                    #             break
+                    # if is_contain_object:
+                    #     # 将VOC图像名称写入子集txt文件中
+                    #     g.write("{0}_{1:07d}\n".format(voc_dataset_name,cnt))
+                    # coco_image_id_dict[image_info['id']] = coco_image_path
+                    # coco_voc_image_dict[coco_image_path] = (voc_image_path,voc_annotation_path)
                     # 将VOC图像名称写入子集txt文件中
-                    g.write("{0}_{1:07d}\n".format(voc_daatset_name,cnt))
+                    g.write("{0}_{1:07d}\n".format(voc_dataset_name,cnt))
+                    coco_image_id_dict[image_info['id']] = coco_image_path
+                    coco_voc_image_dict[coco_image_path] = (voc_image_path, voc_annotation_path)
                     cnt += 1
                 for gt in gts:
                     image_id = gt['image_id']
@@ -111,6 +118,8 @@ def coco2voc(coco_dataset_dir,voc_dataset_dir,year=2017):
     coco_labels = np.array(coco_labels)
     voc_image_paths = np.array(voc_image_paths)
     voc_annotation_paths = np.array(voc_annotation_paths)
+    print(len(coco_image_paths),len(voc_image_paths))
+    print(len(coco_labels),len(voc_annotation_paths))
 
     print("开始多线程处理COCO图像及其标签并转换VOC格式")
     size = len(coco_image_paths)
@@ -140,8 +149,9 @@ def coco2voc(coco_dataset_dir,voc_dataset_dir,year=2017):
 def print_error(value):
     """
     定义错误回调函数
-    :param value:
-    :return:
+    Args:
+        value: 出错误值
+    Returns:
     """
     print("error: ", value)
 
@@ -166,6 +176,10 @@ def single_image_label_process(coco_image_path, coco_label,voc_image_path,voc_an
         cls_name, x1, y1, w, h = bbox_label
         x2 = x1 + w
         y2 = y1 + h
+        x1 = int(round(x1))
+        y1 = int(round(y1))
+        x2 = int(round(x2))
+        y2 = int(round(y2))
         writer.addObject(cls_name,x1,y1,x2,y2)
     writer.save(voc_annotation_path)
 
@@ -193,12 +207,24 @@ def run_main():
     这是主函数
     """
     # COCO --> VOC
-    print("COCO2017 --> VOC Start")
-    coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/COCO2017")
-    voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/VOC/COCO2017")
+    coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/origin/COCO2017")
+    voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/coco2017")
     year = 2017
-    coco2voc(coco_dataset_dir,voc_dataset_dir,year)
-    print("COCO2017 --> VOC Finish")
+    choices = ['train','val']
+    coco2voc(coco_dataset_dir,voc_dataset_dir,year,choices)
+
+    #
+    # # VOC2007_coco --> VOC2007
+    # coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/voc2007_coco")
+    # voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/voc2007")
+    # choices = ['train', 'val','test']
+    # coco2voc(coco_dataset_dir,voc_dataset_dir,choices=choices)
+    #
+    # # VOC2012_coco --> VOC2012
+    # coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/voc2012_coco")
+    # voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/voc2012")
+    # choices = ['train', 'val']
+    # coco2voc(coco_dataset_dir,voc_dataset_dir,choices=choices)
 
 if __name__ == '__main__':
     run_main()

@@ -30,47 +30,49 @@ def voc2coco(voc_dataset_dir,coco_dataset_dir,class_names,save_image=False,choic
     """
     if type(choices) == 'str':
         choices = [choices]
+    if "trainval" in choices:
+        choices.remove("trainval")
+
     # 初始化VOC数据集相关路径
     voc_image_dir = os.path.join(voc_dataset_dir,"JPEGImages")
+    if not os.path.exists(voc_image_dir):
+        voc_image_dir = os.path.join(voc_dataset_dir, "images")
     voc_annotation_dir = os.path.join(voc_dataset_dir,"Annotations")
     voc_main_dir = os.path.join(voc_dataset_dir,"ImageSets","Main")
-    voc_train_txt_path = os.path.join(voc_main_dir,'train.txt')
-    voc_val_txt_path = os.path.join(voc_main_dir, 'val.txt')
+    voc_txt_paths = []
+    for choice in choices:
+        _voc_txt_path = os.path.join(voc_main_dir,'{0}.txt'.format(choice))
+        voc_txt_paths.append(_voc_txt_path)
 
     # 初始化COCO数据集路径
-    coco_train_image_dir = os.path.join(coco_dataset_dir,"train")
-    coco_val_image_dir = os.path.join(coco_dataset_dir,'val')
-    coco_annotations_dir = os.path.join(coco_dataset_dir,'annotations')
-    coco_train_json_path = os.path.join(coco_annotations_dir,'train.json')
-    coco_val_json_path = os.path.join(coco_annotations_dir,'val.json')
-    if not os.path.exists(coco_train_image_dir):
-        os.makedirs(coco_train_image_dir)
-    if not os.path.exists(coco_val_image_dir):
-        os.makedirs(coco_val_image_dir)
+    coco_annotations_dir = os.path.join(coco_dataset_dir, 'annotations')
     if not os.path.exists(coco_annotations_dir):
         os.makedirs(coco_annotations_dir)
+    coco_image_dirs = []
+    coco_json_paths = []
+    for choice in choices:
+        _coco_image_dir = os.path.join(coco_dataset_dir,choice)
+        _coco_json_path = os.path.join(coco_annotations_dir,"{}.json".format(choice))
+        if not os.path.exists(_coco_image_dir):
+            os.makedirs(_coco_image_dir)
+        coco_image_dirs.append(_coco_image_dir)
+        coco_json_paths.append(_coco_json_path)
+    coco_image_dirs = np.array(coco_image_dirs)
+    coco_json_paths = np.array(coco_json_paths)
 
     # 初始化图像及其标签路径
     image_cnt = 0
     annotation_cnt = 0
     voc_image_paths = []
     coco_image_paths = []
-    if 'train' in choices:
-        print("VOC-->COCO 训练集标签转换开始")
+    for i,choice in enumerate(choices):
+        print("VOC-->COCO {}子集标签转换开始".format(choice))
         voc_train_image_paths, coco_train_image_paths, image_cnt, annotation_cnt \
-            = xml2json(voc_image_dir,voc_annotation_dir,voc_train_txt_path,
-                       coco_train_image_dir,coco_train_json_path,class_names,image_cnt,annotation_cnt)
+            = xml2json(voc_image_dir, voc_annotation_dir, voc_txt_paths[i],
+                       coco_image_dirs[i], coco_json_paths[i], class_names, image_cnt, annotation_cnt)
         voc_image_paths.append(voc_train_image_paths)
         coco_image_paths.append(coco_train_image_paths)
-        print("VOC-->COCO 训练集标签转换结束")
-    if 'val' in choices:
-        print("VOC-->COCO 验证集标签转换开始")
-        voc_val_image_paths, coco_val_image_paths, image_cnt, annotation_cnt \
-            = xml2json(voc_image_dir, voc_annotation_dir, voc_val_txt_path,
-                       coco_val_image_dir, coco_val_json_path, class_names, image_cnt, annotation_cnt)
-        voc_image_paths.append(voc_val_image_paths)
-        coco_image_paths.append(coco_val_image_paths)
-        print("VOC-->COCO 验证集标签转换结束")
+        print("VOC-->COCO {}子集标签转换结束".format(choice))
     voc_image_paths = np.concatenate(voc_image_paths)
     coco_image_paths = np.concatenate(coco_image_paths)
 
@@ -114,21 +116,20 @@ def xml2json(voc_image_dir,voc_annotation_dir,voc_txt_path,coco_image_dir,coco_j
     """
     voc_dataset_dir,_ = os.path.split(voc_image_dir)
     _,voc_dataset_name = os.path.split(voc_dataset_dir)
+    coco_dataset_dir,_ = os.path.split(coco_image_dir)
+    _,coco_dataset_name = os.path.split(coco_dataset_dir)
     # 初始化相关文件路径
     voc_image_paths = []
-    voc_image_names = []
     voc_xml_paths = []
     coco_image_paths = []
     coco_image_ids = []
     with open(voc_txt_path, 'r') as f:
         for line in f.readlines():
-            voc_image_names.append("{0}.jpg".format(line.strip()))
             voc_image_paths.append(os.path.join(voc_image_dir, "{0}.jpg".format(line.strip())))
             voc_xml_paths.append(os.path.join(voc_annotation_dir, "{0}.xml".format(line.strip())))
-            coco_image_paths.append(os.path.join(coco_image_dir, "{0}.jpg".format(line.strip())))
+            coco_image_paths.append(os.path.join(coco_image_dir, "{0}_{1:06d}.jpg".format(coco_dataset_name,image_cnt)))
             coco_image_ids.append(image_cnt)
             image_cnt += 1
-    voc_image_names = np.array(voc_image_names)
     voc_image_paths = np.array(voc_image_paths)
     voc_xml_paths = np.array(voc_xml_paths)
     coco_image_paths = np.array(coco_image_paths)
@@ -137,12 +138,13 @@ def xml2json(voc_image_dir,voc_annotation_dir,voc_txt_path,coco_image_dir,coco_j
     image_infos = []
     detection_results = []
     for i in tqdm(np.arange(len(voc_image_paths))):
-        voc_image_name = voc_image_names[i]
         voc_xml_path = voc_xml_paths[i]
         coco_image_id = coco_image_ids[i]
+        coco_image_path = coco_image_paths[i]
+        _,coco_image_name = os.path.split(coco_image_path)
         if is_contain_object(voc_xml_path):
             objects,(h,w) = parse_xml(voc_xml_path)
-            image_infos.append({'file_name': voc_image_name, 'id': coco_image_id,'width':w,'height':h})
+            image_infos.append({'file_name': coco_image_name, 'id': coco_image_id,'width':w,'height':h})
             for obj in objects:
                 cls_name, xmin, ymin, xmax, ymax = obj
                 w = xmax - xmin
@@ -165,19 +167,22 @@ def xml2json(voc_image_dir,voc_annotation_dir,voc_txt_path,coco_image_dir,coco_j
 
 def is_contain_object(xml_path):
     """
-    这是判断XML文件中是否包含目标标签的函数
-    :param xml_path: XML文件路径
-    :return:
+    这是判断VOC数据集XML标签文件中是否包含目标的函数
+    Args:
+        xml_path: VOC数据集XML标签文件路径
+    Returns:
     """
     # 获取XML文件的根结点
     root = ET.parse(xml_path).getroot()
     return len(root.findall('object')) > 0
 
-def parse_xml(xml_path):
+def parse_xml(xml_path,class_names=None):
     """
-    这是解析VOC数据集XML标签文件，获取每个目标分类与定位的函数
-    :param xml_path: XML标签文件路径
-    :return:
+     这是解析VOC数据集XML标签文件，获取每个目标分类与定位的函数
+    Args:
+        xml_path: XML标签文件路径
+        class_names: 目标名称数组，默认为None
+    Returns:
     """
     # 获取XML文件的根结点
     root = ET.parse(xml_path).getroot()
@@ -192,7 +197,11 @@ def parse_xml(xml_path):
         ymin = bndbox.find('ymin').text
         xmax = bndbox.find('xmax').text
         ymax = bndbox.find('ymax').text
-        objects.append([obj_name, int(xmin), int(ymin), int(xmax), int(ymax)])
+        if class_names is None:
+            objects.append([obj_name, int(xmin), int(ymin), int(xmax), int(ymax)])
+        else:
+            if obj_name in class_names:
+                objects.append([obj_name, int(xmin), int(ymin), int(xmax), int(ymax)])
     return objects,(h,w)
 
 def single_image_copy(voc_image_path,coco_image_path):
@@ -224,11 +233,11 @@ def batch_image_copy(batch_voc_image_paths,batch_coco_image_paths):
 def print_error(value):
     """
     定义错误回调函数
-    :param value:
-    :return:
+    Args:
+        value: 出错误值
+    Returns:
     """
     print("error: ", value)
-
 def get_classes(classes_path):
     """
     这是获取目标分类名称的函数
@@ -260,13 +269,27 @@ def run_main():
     """
     这是主函数
     """
-    voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/coco2017_voc")
-    coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/coco2017")
-    class_name_path = os.path.abspath("./coco_names.txt")
+    # voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/coco2017_voc")
+    # coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/coco2017")
+    # class_name_path = os.path.abspath("./coco_names.txt")
+    # save_image = True
+    # choices = ['train','val']
+    # class_names = get_classes(class_name_path)
+    # voc2coco(voc_dataset_dir,coco_dataset_dir,class_names,save_image,choices)
+
+    voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/origin/VOC2007")
+    coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/voc2007_coco")
+    class_name_path = os.path.abspath("./voc_names.txt")
+    save_image = True
+    choices = ['train','val','test']
+    class_names = get_classes(class_name_path)
+    voc2coco(voc_dataset_dir,coco_dataset_dir,class_names,save_image,choices)
+
+    voc_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/origin/VOC2012")
+    coco_dataset_dir = os.path.abspath("/home/dpw/deeplearning/dataset/voc/voc2012_coco")
+    class_name_path = os.path.abspath("./voc_names.txt")
     save_image = True
     choices = ['train','val']
-
-    # VOC数据集转COCO数据集
     class_names = get_classes(class_name_path)
     voc2coco(voc_dataset_dir,coco_dataset_dir,class_names,save_image,choices)
 

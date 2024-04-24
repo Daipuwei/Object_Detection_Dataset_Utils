@@ -6,7 +6,7 @@
 # @Software: PyCharm
 
 """
-    这是检查VOC数据集是否存在异常的脚本
+    这是检查VOC数据集是否存在异常的脚本,检测XML文件与图像文件是否一一对应，XML文件中是否不存目标
 """
 
 import os
@@ -26,6 +26,8 @@ def check_voc_dataset(voc_dataset_dir):
     """
     # 初始化相关路径
     voc_image_dir = os.path.join(voc_dataset_dir,"JPEGImages")
+    if not os.path.exists(voc_image_dir):
+        voc_image_dir = os.path.join(voc_dataset_dir, "images")
     voc_annotatiion_dir = os.path.join(voc_dataset_dir,"Annotations")
 
     # 初始化xml和图像路径

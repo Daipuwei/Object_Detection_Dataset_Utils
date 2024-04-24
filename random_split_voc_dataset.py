@@ -14,10 +14,11 @@ import numpy as np
 
 def random_split_voc_dataset(voc_dataset_dir,train_ratio=0.8):
     """
-    这是随机划分VOC数据集为训练集和验证集的函数
-    :param voc_dataset_dir: VOC数据集地址
-    :param train_ratio: 训练集比例，默认为0.8
-    :return:
+    这是随机划分VOC数据集的函数
+    Args:
+        voc_dataset_dir: voc数据集地址
+        train_ratio: 训练集比例，默认为0.8
+    Returns:
     """
     # 初始化相关文件和文件夹路径
     voc_main_dir = os.path.join(voc_dataset_dir,'ImageSets','Main')
